@@ -1,0 +1,52 @@
+import socket
+#random port number
+port= 5060
+#assume data =16 as we donno the data length- if 5 len of message then need 1 to store 5, if data len 100 then need 3 to store that
+data=16
+disconnected_msg="End"
+format="utf-8"
+#server name
+hostname= socket.gethostname()
+#host ip address
+host_addr= socket.gethostbyname(hostname)
+server_socket_address= (host_addr, port)
+#IPV4 set, TCP set- server var is the obj for server
+server= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#bind
+server.bind(server_socket_address)
+#listen
+server.listen()
+print("Server is listening")
+
+while True:
+    #address has client's socket address
+    conn,addr= server.accept()
+    print("Connected to: ", addr)
+    connected= True
+
+    while connected:
+        #client send hello- hello's length is 5 but length of the length of hello is 1 as it takes 1 place to store 5
+        #initial- len of the msg sent by client
+        initial = conn.recv(data).decode(format)
+        if initial:
+            meg_length= int(initial)
+            msg= conn.recv(meg_length).decode(format)
+
+            if msg==disconnected_msg:
+                print("Terminating connection with", addr )
+                conn.send("Nice to meet you".encode(format))
+                connected=False
+            else:
+                hours= int(msg)
+                receive=0
+                if hours<=40:
+                    receive= hours*200
+                else:
+                    extra= (hours-40)*300
+                    receive=8000+extra  
+
+                conn.send(f"Salary: {receive}".encode(format))
+               
+
+
+    conn.close()
